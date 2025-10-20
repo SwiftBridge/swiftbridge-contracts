@@ -30,36 +30,18 @@ async function main() {
   console.log("SwapRouter:    ", await swapRouter.getAddress());
   console.log("\n");
 
-  // Example interactions
-
   // 1. Register a username
   console.log("=== Registering Username ===");
   try {
     const username = "testuser_" + Date.now();
     const tx = await userRegistry.registerUsername(username);
     await tx.wait();
-    console.log("Is trusted operator:", isOperator ? "Yes ✅" : "No ❌");
-  } catch (error: any) {
-    console.log("Error:", error.message);
-  }
-  console.log("\n");
-
-  console.log("=".repeat(60));
-  console.log("Interaction complete!");
-  console.log("=".repeat(60));
-}
-
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });✅ Username registered:", username);
+    console.log("Username registered:", username);
     
     const registeredAddress = await userRegistry.usernameToAddress(username);
-    console.log("   Mapped to address:", registeredAddress);
+    console.log("Mapped to address:", registeredAddress);
   } catch (error: any) {
-    console.log("ℹ️  Username registration:", error.message);
+    console.log("Username registration info:", error.message);
   }
   console.log("\n");
 
@@ -69,9 +51,9 @@ main()
     const hasUsername = await userRegistry.hasUsername(signer.address);
     if (hasUsername) {
       const username = await userRegistry.addressToUsername(signer.address);
-      console.log("✅ Your username:", username);
+      console.log("Your username:", username);
     } else {
-      console.log("ℹ️  No username registered for this address");
+      console.log("No username registered for this address");
     }
   } catch (error: any) {
     console.log("Error:", error.message);
@@ -130,4 +112,20 @@ main()
   console.log("=== Operator Status ===");
   try {
     const isOperator = await escrowManager.trustedOperators(signer.address);
-    console.log("
+    console.log("Is trusted operator:", isOperator ? "Yes" : "No");
+  } catch (error: any) {
+    console.log("Error:", error.message);
+  }
+  console.log("\n");
+
+  console.log("=".repeat(60));
+  console.log("Interaction complete!");
+  console.log("=".repeat(60));
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
