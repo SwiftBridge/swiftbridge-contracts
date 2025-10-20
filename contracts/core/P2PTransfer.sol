@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 interface IUserRegistry {
     function getAddressByUsername(string memory username) external view returns (address);
+    function getUsernameByAddress(address user) external view returns (string memory);
     function isUsernameRegistered(string memory username) external view returns (bool);
 }
 
@@ -241,7 +242,7 @@ contract P2PTransfer is Ownable, Pausable, ReentrancyGuard {
     function claimPendingTransfers() external nonReentrant returns (uint256[] memory) {
         // Get caller's username from registry
         string memory username;
-        try userRegistry.getAddressByUsername(msg.sender) returns (string memory uname) {
+        try userRegistry.getUsernameByAddress(msg.sender) returns (string memory uname) {
             username = uname;
         } catch {
             revert UsernameNotRegistered();

@@ -1,0 +1,13 @@
+{
+  "network": "baseSepolia",
+  "chainId": 84532,
+  "deployer": "0x5EE16884f6cF63DF6822fa525246F471CafC600a",
+  "feeCollector": "0x9B89D270DaA49ef8F70703364Aa2DAfB04f60438",
+  "contracts": {
+    "UserRegistry": "0xFaaE04873914c0102B3c1aA5BCE05C51d0BD3667",
+    "EscrowManager": "0xBd5287110A78d32A5435E97449BBA408E4F52568",
+    "P2PTransfer": "0x2B1160DCAAbFBC21508629425901c809Db923774",
+    "SwapRouter": "0xb71A9C877B0C5CFee262E6039be2439964E0DCdf"
+  },
+  "timestamp": "2025-10-20T10:39:56.929Z"
+}

@@ -7,6 +7,36 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+// Uniswap V3 interfaces
+interface IUniswapV3SwapRouter {
+    struct ExactInputSingleParams {
+        address tokenIn;
+        address tokenOut;
+        uint24 fee;
+        address recipient;
+        uint256 deadline;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
+        uint160 sqrtPriceLimitX96;
+    }
+    
+    function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+}
+
+interface IQuoter {
+    function quoteExactInputSingle(
+        address tokenIn,
+        address tokenOut,
+        uint24 fee,
+        uint256 amountIn,
+        uint160 sqrtPriceLimitX96
+    ) external returns (uint256 amountOut);
+}
+
+interface IWETH {
+    function withdraw(uint256) external;
+}
+
 /**
  * @title SwapRouter
  * @notice Handles token swaps via Uniswap V3 on Base network
@@ -15,34 +45,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract SwapRouter is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     
-    // Uniswap V3 interfaces
-    interface ISwapRouter {
-        struct ExactInputSingleParams {
-            address tokenIn;
-            address tokenOut;
-            uint24 fee;
-            address recipient;
-            uint256 deadline;
-            uint256 amountIn;
-            uint256 amountOutMinimum;
-            uint160 sqrtPriceLimitX96;
-        }
-        
-        function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
-    }
-    
-    interface IQuoter {
-        function quoteExactInputSingle(
-            address tokenIn,
-            address tokenOut,
-            uint24 fee,
-            uint256 amountIn,
-            uint160 sqrtPriceLimitX96
-        ) external returns (uint256 amountOut);
-    }
-    
     // State variables
-    ISwapRouter public immutable uniswapRouter;
+    IUniswapV3SwapRouter public immutable uniswapRouter;
     IQuoter public quoter;
     address public immutable WETH;
     
@@ -85,7 +89,7 @@ contract SwapRouter is Ownable, Pausable, ReentrancyGuard {
             revert InvalidAddress();
         }
         
-        uniswapRouter = ISwapRouter(_uniswapRouter);
+        uniswapRouter = IUniswapV3SwapRouter(_uniswapRouter);
         quoter = IQuoter(_quoter);
         WETH = _weth;
         feeCollector = _feeCollector;
@@ -127,7 +131,7 @@ contract SwapRouter is Ownable, Pausable, ReentrancyGuard {
         IERC20(tokenIn).forceApprove(address(uniswapRouter), amountToSwap);
         
         // Execute swap
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+        IUniswapV3SwapRouter.ExactInputSingleParams memory params = IUniswapV3SwapRouter.ExactInputSingleParams({
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             fee: poolFee,
@@ -174,7 +178,7 @@ contract SwapRouter is Ownable, Pausable, ReentrancyGuard {
         }
         
         // Execute swap
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+        IUniswapV3SwapRouter.ExactInputSingleParams memory params = IUniswapV3SwapRouter.ExactInputSingleParams({
             tokenIn: WETH,
             tokenOut: tokenOut,
             fee: poolFee,
@@ -228,7 +232,7 @@ contract SwapRouter is Ownable, Pausable, ReentrancyGuard {
         IERC20(tokenIn).forceApprove(address(uniswapRouter), amountToSwap);
         
         // Execute swap
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+        IUniswapV3SwapRouter.ExactInputSingleParams memory params = IUniswapV3SwapRouter.ExactInputSingleParams({
             tokenIn: tokenIn,
             tokenOut: WETH,
             fee: poolFee,
@@ -355,9 +359,4 @@ contract SwapRouter is Ownable, Pausable, ReentrancyGuard {
     
     // Receive ETH
     receive() external payable {}
-}
-
-// WETH interface
-interface IWETH {
-    function withdraw(uint256) external;
 }
